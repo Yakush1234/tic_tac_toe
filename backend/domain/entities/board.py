@@ -1,0 +1,50 @@
+"""Cell placement and winning lines on a square board."""
+
+from typing import Self
+
+from backend.domain.enums import BoardSize, Mark
+from backend.domain.values import BoardSnapshot, Position
+
+
+class Board:
+    """Square grid that holds marks and detects completed lines."""
+
+    def __init__(self: Self, size: BoardSize) -> None:
+        """Create an empty board of the given size."""
+        if not isinstance(size, BoardSize):
+            raise ValueError("Unsupported board size")
+        self._cells: list[list[Mark | None]] = [
+            [None] * size.value for _ in range(size.value)
+        ]
+
+    def snapshot(self: Self) -> BoardSnapshot:
+        """Return an immutable row-by-row copy of the current cells."""
+        return tuple(tuple(row) for row in self._cells)
+
+    def place(self: Self, position: Position, mark: Mark) -> None:
+        """Place a mark in an empty cell or raise ValueError for an invalid move."""
+        if not isinstance(mark, Mark):
+            raise ValueError("Unknown mark")
+        row: int = position.row
+        column: int = position.column
+        n: int = len(self._cells)
+        if not (0 <= row < n and 0 <= column < n):
+            raise ValueError("Cell is outside the board")
+        if self._cells[row][column] is not None:
+            raise ValueError("Cell is already occupied")
+        self._cells[row][column] = mark
+
+    def has_winning_line(self: Self, mark: Mark) -> bool:
+        """Check whether the mark fills a row, column, or corner-to-corner diagonal."""
+        cells: list[list[Mark | None]] = self._cells
+        indices: range = range(len(cells))
+        return (
+            any(all(cell is mark for cell in row) for row in cells)
+            or any(all(row[col] is mark for row in cells) for col in indices)
+            or all(cells[i][i] is mark for i in indices)
+            or all(cells[i][-1 - i] is mark for i in indices)
+        )
+
+    def is_full(self: Self) -> bool:
+        """Return whether every cell contains a mark."""
+        return all(None not in row for row in self._cells)
