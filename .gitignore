@@ -12,3 +12,6 @@ venv/
 *.iml
 *.ipr
 *.iws
+
+# Other stuff
+PROJECT_PLAN.md
