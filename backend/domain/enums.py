@@ -15,7 +15,7 @@ class BoardSize(Enum):
 
 
 class Mark(Enum):
-    """Symbol a player places in an empty cell."""
+    """Cell contents: E for an empty cell, X or O for a player's mark."""
 
     _value_: str
 

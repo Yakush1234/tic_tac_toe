@@ -5,7 +5,7 @@ from typing import Self
 
 from backend.domain.enums import BoardSize, BotMode, Mark
 
-type BoardSnapshot = tuple[tuple[Mark | None, ...], ...]
+type BoardSnapshot = tuple[tuple[Mark, ...], ...]
 
 
 @dataclass(frozen=True, slots=True)

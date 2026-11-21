@@ -13,8 +13,8 @@ class Board:
         """Create an empty board of the given size."""
         if not isinstance(size, BoardSize):
             raise ValueError("Unsupported board size")
-        self._cells: list[list[Mark | None]] = [
-            [None] * size.value for _ in range(size.value)
+        self._cells: list[list[Mark]] = [
+            [Mark.E] * size.value for _ in range(size.value)
         ]
 
     def snapshot(self: Self) -> BoardSnapshot:
@@ -23,20 +23,22 @@ class Board:
 
     def place(self: Self, position: Position, mark: Mark) -> None:
         """Place a mark in an empty cell or raise ValueError for an invalid move."""
-        if not isinstance(mark, Mark):
-            raise ValueError("Unknown mark")
+        if mark not in (Mark.X, Mark.O):
+            raise ValueError("A move must place X or O")
         row: int = position.row
         column: int = position.column
         n: int = len(self._cells)
         if not (0 <= row < n and 0 <= column < n):
             raise ValueError("Cell is outside the board")
-        if self._cells[row][column] is not None:
+        if self._cells[row][column] is not Mark.E:
             raise ValueError("Cell is already occupied")
         self._cells[row][column] = mark
 
     def has_winning_line(self: Self, mark: Mark) -> bool:
         """Check whether the mark fills a row, column, or corner-to-corner diagonal."""
-        cells: list[list[Mark | None]] = self._cells
+        if mark is Mark.E:
+            return False
+        cells: list[list[Mark]] = self._cells
         indices: range = range(len(cells))
         return (
             any(all(cell is mark for cell in row) for row in cells)
@@ -46,5 +48,5 @@ class Board:
         )
 
     def is_full(self: Self) -> bool:
-        """Return whether every cell contains a mark."""
-        return all(None not in row for row in self._cells)
+        """Return whether every cell is occupied by a player."""
+        return all(Mark.E not in row for row in self._cells)
