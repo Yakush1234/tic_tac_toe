@@ -1,7 +1,6 @@
-"""Initialize the backend runtime."""
+"""Launch the game backend with python -m backend.main."""
 
-from os import environ
+from backend.presentation.api.entrypoint import run
 
-from backend.infrastructure.logging_config import configure_logging
-
-configure_logging(environ.get("BACKEND_LOG_LEVEL", "INFO").upper())
+if __name__ == "__main__":
+    run()
