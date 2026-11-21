@@ -12,7 +12,10 @@ class Game:
     """A two-player game in which X starts and participants alternate turns."""
 
     def __init__(
-        self: Self, settings: GameSettings = GameSettings(), *, x_player: Player | None = None
+        self: Self,
+        settings: GameSettings = GameSettings(),
+        *,
+        x_player: Player | None = None,
     ) -> None:
         """Start a game, assigning X at random unless its owner is supplied."""
         if x_player is None:

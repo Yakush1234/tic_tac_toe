@@ -19,8 +19,9 @@ class Mark(Enum):
 
     _value_: str
 
+    E = "E"
     X = "X"
-    O = "O"
+    O = "O"  # noqa: E741
 
 
 class Player(Enum):

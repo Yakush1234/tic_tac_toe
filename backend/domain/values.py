@@ -12,7 +12,6 @@ type BoardSnapshot = tuple[tuple[Mark | None, ...], ...]
 class Position:
     """Zero-based row and column of a cell."""
 
-
     row: int
     column: int
 
