@@ -3,6 +3,7 @@
 from typing import Self
 
 from backend.domain.enums import BoardSize, Mark
+from backend.domain.exceptions import InvalidMoveError
 from backend.domain.values import BoardSnapshot, Position
 
 
@@ -24,14 +25,14 @@ class Board:
     def place(self: Self, position: Position, mark: Mark) -> None:
         """Place a mark in an empty cell or raise ValueError for an invalid move."""
         if mark not in (Mark.X, Mark.O):
-            raise ValueError("A move must place X or O")
+            raise InvalidMoveError("A move must place X or O")
         row: int = position.row
         column: int = position.column
         n: int = len(self._cells)
         if not (0 <= row < n and 0 <= column < n):
-            raise ValueError("Cell is outside the board")
+            raise InvalidMoveError("Cell is outside the board")
         if self._cells[row][column] is not Mark.E:
-            raise ValueError("Cell is already occupied")
+            raise InvalidMoveError("Cell is already occupied")
         self._cells[row][column] = mark
 
     def has_winning_line(self: Self, mark: Mark) -> bool:

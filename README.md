@@ -1,0 +1,45 @@
+# Tic-tac-toe API
+
+A FastAPI backend for a human playing against a random bot on a 3×3, 4×4, or 5×5 board.
+
+## Run
+
+Use Python 3.12+ and uv. From the repository root:
+
+```shell
+uv sync --locked --no-dev
+uv run --no-sync python -m backend.main
+```
+
+Interactive documentation is available at `http://127.0.0.1:8000/docs`. For local development with reload:
+
+```shell
+uv run uvicorn backend.presentation.api.entrypoint:create_app --factory --reload
+```
+
+## Game API
+
+| Method | Path | Request and result |
+| --- | --- | --- |
+| POST | `/games` | An empty body starts a default game. Optional fields are `size`, `bot_mode` (currently `random`), and `previous_id` to replace a game. Returns 201 and the opening board. |
+| GET | `/games/{game_id}` | Returns the last committed state, including the result of a finished game. |
+| POST | `/games/{game_id}/moves` | Send zero-based integer coordinates such as `{"row": 0, "column": 1}`. Returns the board after the human move and any bot reply. |
+
+An unknown game returns 404. An illegal move returns 409. Invalid request data returns 422. A failed bot turn leaves the last committed board available for retrieval.
+
+## Operation
+
+The backend uses one process and one in-memory repository. Use a single worker and a single instance for this version. Restarting the process clears all games. Put TLS termination and process restart supervision in the hosting environment.
+
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| `BACKEND_HOST` | `127.0.0.1` | Bind address for the module entrypoint |
+| `BACKEND_PORT` | `8000` | Bind port for the module entrypoint |
+| `BACKEND_MAX_GAMES` | `10000` | Maximum stored games, including finished games |
+| `BACKEND_APP_TITLE` | `Tic-Tac-Toe` | OpenAPI title |
+| `BACKEND_LOG_LEVEL` | `INFO` | Backend diagnostic log level |
+| `BACKEND_LOG_FORMAT` | `%(asctime)s %(levelname)s %(name)s %(message)s` | Backend log record format |
+
+At capacity, creating an additional game returns 503. Reads, moves, and replacement of an existing game remain available. Abandoned games occupy a slot until replacement or restart. Set the limit according to the memory budget and expected session count.
+
+The game UUID grants access to read and play the game. The module entrypoint disables Uvicorn access logs; configure any proxy access logs to omit game identifiers as well.

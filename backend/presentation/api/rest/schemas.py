@@ -8,6 +8,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from backend.domain.enums import BoardSize
 
 
+class ErrorResponse(BaseModel):
+    """Public description of a game operation failure."""
+
+    detail: str
+
+
 class StartGameRequest(BaseModel):
     """Settings for a new game and the optional game it replaces."""
 

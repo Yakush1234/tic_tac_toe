@@ -1,8 +1,6 @@
 """Translate game failures into REST responses."""
 
-from typing import Self
-
-from fastapi import HTTPException, Request, status
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
 
@@ -13,9 +11,23 @@ async def game_not_found(request: Request, error: Exception) -> JSONResponse:
     )
 
 
-class MoveConflict(HTTPException):
-    """A move that the current game state does not allow."""
+async def move_conflict(request: Request, error: Exception) -> JSONResponse:
+    """Expose the reason for a rejected human move."""
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT, content={"detail": str(error)}
+    )
 
-    def __init__(self: Self, reason: str) -> None:
-        """Return the domain's reason for rejecting the move."""
-        super().__init__(status.HTTP_409_CONFLICT, detail=reason)
+
+async def storage_full(request: Request, error: Exception) -> JSONResponse:
+    """Report that the process has reached its configured game limit."""
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"detail": str(error)}
+    )
+
+
+async def internal_error(request: Request, error: Exception) -> JSONResponse:
+    """Keep internal details in the ASGI server's exception log."""
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal server error"},
+    )

@@ -8,7 +8,11 @@ from threading import Lock
 from typing import Self
 from uuid import UUID, uuid4
 
-from backend.application.game_repository import GameNotFoundError, GameRepository
+from backend.application.game_repository import (
+    GameNotFoundError,
+    GameRepository,
+    RepositoryFullError,
+)
 from backend.domain.entities.game import Game
 
 
@@ -23,15 +27,23 @@ class _Entry:
 class MemoryGameRepository(GameRepository):
     """Keep independent games in memory for the lifetime of this instance."""
 
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, max_games: int | None = None) -> None:
         """Start an empty repository."""
         self._entries: dict[UUID, _Entry] = {}
         self._lock: Lock = Lock()
+        self._max_games: int | None = max_games
 
     def create(self: Self, game: Game, previous_id: UUID | None = None) -> UUID:
         """Store a detached game and retire its predecessor in one operation."""
         entry: _Entry = _Entry(deepcopy(game))
         with self._lock:
+            replacing: bool = previous_id is not None and previous_id in self._entries
+            if (
+                not replacing
+                and self._max_games is not None
+                and len(self._entries) >= self._max_games
+            ):
+                raise RepositoryFullError("Game storage is full")
             game_id: UUID = uuid4()
             while game_id in self._entries or game_id == previous_id:
                 game_id = uuid4()

@@ -3,7 +3,7 @@
 from logging import getLevelNamesMapping
 from typing import Self
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="BACKEND_", frozen=True)
 
     app_title: str = "Tic-Tac-Toe"
+    host: str = "127.0.0.1"
+    port: int = Field(default=8000, ge=1, le=65535)
+    max_games: int = Field(default=10_000, gt=0)
     log_level: str = "INFO"
     log_format: str = "%(asctime)s %(levelname)s %(name)s %(message)s"
 

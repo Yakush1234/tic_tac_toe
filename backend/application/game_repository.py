@@ -11,6 +11,10 @@ class GameNotFoundError(LookupError):
     """The requested game is no longer available."""
 
 
+class RepositoryFullError(RuntimeError):
+    """The repository cannot accept another game."""
+
+
 class GameRepository(Protocol):
     """Serialize edits and replacements of the same game."""
 

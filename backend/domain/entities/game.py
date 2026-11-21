@@ -5,6 +5,7 @@ from typing import Self
 
 from backend.domain.entities.board import Board
 from backend.domain.enums import Mark, Player
+from backend.domain.exceptions import InvalidMoveError
 from backend.domain.values import BoardSnapshot, GameSettings, Position
 
 
@@ -62,9 +63,9 @@ class Game:
     def play(self: Self, player: Player, position: Position) -> None:
         """Apply a legal move, then record a win or draw or pass the turn."""
         if self._current_player is None:
-            raise ValueError("The game has ended")
+            raise InvalidMoveError("The game has ended")
         if player is not self._current_player:
-            raise ValueError("It is the other player's turn")
+            raise InvalidMoveError("It is the other player's turn")
 
         mark: Mark = self.mark_for(player)
         self._board.place(position, mark)
