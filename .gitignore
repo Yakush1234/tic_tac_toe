@@ -13,6 +13,5 @@ venv/
 *.ipr
 *.iws
 
-# Other stuff
-PROJECT_PLAN.md
-AGENTS.md
+# Ruff stuff:
+.ruff_cache/
