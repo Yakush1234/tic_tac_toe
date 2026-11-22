@@ -17,6 +17,14 @@ Open `http://127.0.0.1:8000/` to play in the browser. The same server hosts the 
 uv run uvicorn backend.presentation.api.entrypoint:create_app --factory --reload
 ```
 
+## Play in the terminal
+
+Run this command from the repository root to play in the terminal:
+
+```shell
+python -m backend.presentation.cli.entrypoint
+```
+
 ## Docker Compose
 
 From the repository root, run:
@@ -41,9 +49,9 @@ An unknown game returns 404. An illegal move returns 409. Invalid request data r
 
 ## Operation
 
-The backend runs with built-in defaults. To customize local settings, copy `.env.example` to `.env` in the repository root and edit the values. Process environment variables take precedence over `.env`, and Git ignores the local file.
+The backend runs with built-in defaults. To customize local settings, copy `.env.example` to `.env` in the repository root and edit the values.
 
-The backend uses one process and one in-memory repository. Use a single worker and a single instance for this version. Restarting the process clears all games. Put TLS termination and process restart supervision in the hosting environment.
+The backend uses one process and one in-memory repository. Use a single worker and a single instance for this version. Restarting the process clears all games.
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
@@ -54,7 +62,3 @@ The backend uses one process and one in-memory repository. Use a single worker a
 | `BACKEND_APP_TITLE` | `Tic-Tac-Toe` | OpenAPI title |
 | `BACKEND_LOG_LEVEL` | `INFO` | Backend diagnostic log level |
 | `BACKEND_LOG_FORMAT` | `%(asctime)s %(levelname)s %(name)s %(message)s` | Backend log record format |
-
-At capacity, creating an additional game returns 503. Reads, moves, and replacement of an existing game remain available. Abandoned games occupy a slot until replacement or restart. Set the limit according to the memory budget and expected session count.
-
-The game UUID grants access to read and play the game. The module entrypoint disables Uvicorn access logs; configure any proxy access logs to omit game identifiers as well.
