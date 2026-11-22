@@ -17,6 +17,14 @@ Open `http://127.0.0.1:8000/` to play in the browser. The same server hosts the 
 uv run uvicorn backend.presentation.api.entrypoint:create_app --factory --reload
 ```
 
+## Play in the terminal
+
+Run this command from the repository root to play in the terminal:
+
+```shell
+python -m backend.presentation.cli.entrypoint
+```
+
 ## Docker Compose
 
 From the repository root, run:
