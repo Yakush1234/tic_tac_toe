@@ -2,6 +2,11 @@
 
 A FastAPI backend for a human playing against a random or smart bot on a 3×3, 4×4, or 5×5 board.
 
+## Preview
+
+<img width="650" alt="TicTacToe" src="https://github.com/user-attachments/assets/4de91c5e-c24e-4557-8f1d-5db1503c36a1" />
+
+
 ## Run
 
 Use Python 3.12+ and uv. From the repository root:
