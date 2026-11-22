@@ -1,11 +1,11 @@
 """Request schemas for the game REST API."""
 
-from typing import Annotated, Literal
+from typing import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.domain.enums import BoardSize
+from backend.domain.enums import BoardSize, BotMode
 
 
 class ErrorResponse(BaseModel):
@@ -19,7 +19,7 @@ class StartGameRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     size: BoardSize = BoardSize.THREE
-    bot_mode: Literal["random"] = "random"
+    bot_mode: BotMode = BotMode.RANDOM
     previous_id: UUID | None = None
 
 

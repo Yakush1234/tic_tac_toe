@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = Field(default=8000, ge=1, le=65535)
     max_games: int = Field(default=10_000, gt=0)
+    bot_search_budget_ms: int = Field(default=200, ge=0, lt=1000)
     log_level: str = "INFO"
     log_format: str = "%(asctime)s %(levelname)s %(name)s %(message)s"
 

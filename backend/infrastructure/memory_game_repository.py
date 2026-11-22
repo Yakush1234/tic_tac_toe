@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
 from threading import Lock
-from typing import Self
+from typing import Self, override
 from uuid import UUID, uuid4
 
 from backend.application.game_repository import (
@@ -33,6 +33,7 @@ class MemoryGameRepository(GameRepository):
         self._lock: Lock = Lock()
         self._max_games: int | None = max_games
 
+    @override
     def create(self: Self, game: Game, previous_id: UUID | None = None) -> UUID:
         """Store a detached game and retire its predecessor in one operation."""
         entry: _Entry = _Entry(deepcopy(game))
@@ -59,12 +60,14 @@ class MemoryGameRepository(GameRepository):
         except KeyError:
             raise GameNotFoundError(game_id) from None
 
+    @override
     def get(self: Self, game_id: UUID) -> Game:
         """Return a detached copy of the last committed position."""
         with self._lock:
             committed: Game = self._lookup(game_id).game
         return deepcopy(committed)
 
+    @override
     @contextmanager
     def edit(self: Self, game_id: UUID) -> Generator[Game, None, None]:
         """Publish a successful turn only while the original game still exists."""

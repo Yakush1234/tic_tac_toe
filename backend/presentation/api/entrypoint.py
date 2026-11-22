@@ -10,6 +10,7 @@ from backend.config.settings import Settings
 from backend.domain.enums import BotMode
 from backend.domain.exceptions import InvalidMoveError
 from backend.domain.random_bot import RandomBot
+from backend.domain.smart_bot import SmartBot
 from backend.infrastructure.memory_game_repository import MemoryGameRepository
 from backend.presentation.api.rest.exceptions import (
     game_not_found,
@@ -27,7 +28,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     configure_logging(settings)
     app: FastAPI = FastAPI(title=settings.app_title)
     app.state.game_service = GameService(
-        MemoryGameRepository(settings.max_games), {BotMode.RANDOM: RandomBot()}
+        MemoryGameRepository(settings.max_games),
+        {
+            BotMode.RANDOM: RandomBot(),
+            BotMode.SMART: SmartBot(settings.bot_search_budget_ms),
+        },
     )
     app.add_exception_handler(GameNotFoundError, game_not_found)
     app.add_exception_handler(InvalidMoveError, move_conflict)

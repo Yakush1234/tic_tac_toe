@@ -5,7 +5,6 @@ from uuid import UUID
 from fastapi import APIRouter, status
 
 from backend.application.games import GameSnapshot
-from backend.domain.enums import BotMode
 from backend.domain.values import GameSettings, Position
 from backend.presentation.api.rest.dependencies import GameServiceDependency
 from backend.presentation.api.rest.schemas import (
@@ -26,7 +25,7 @@ def start_game(
     service: GameServiceDependency, request: StartGameRequest = StartGameRequest()
 ) -> GameSnapshot:
     """Create a game and include the bot's opening move when it plays X."""
-    settings: GameSettings = GameSettings(request.size, BotMode(request.bot_mode))
+    settings: GameSettings = GameSettings(request.size, request.bot_mode)
     return service.start_game(settings, previous_id=request.previous_id)
 
 
