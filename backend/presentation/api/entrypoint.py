@@ -1,7 +1,11 @@
 """Build and serve the game API."""
 
+from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from backend.application.game_repository import GameNotFoundError, RepositoryFullError
 from backend.application.games import GameService
@@ -19,6 +23,13 @@ from backend.presentation.api.rest.exceptions import (
     storage_full,
 )
 from backend.presentation.api.rest.routers import router
+
+FRONTEND_DIR: Path = Path(__file__).resolve().parents[3] / "frontend"
+
+
+def game_page() -> FileResponse:
+    """Serve the browser entry page."""
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -39,6 +50,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_exception_handler(RepositoryFullError, storage_full)
     app.add_exception_handler(Exception, internal_error)
     app.include_router(router)
+    if settings.serve_frontend:
+        app.add_api_route("/", game_page, methods=["GET"], include_in_schema=False)
+        app.mount("/assets", StaticFiles(directory=FRONTEND_DIR), name="frontend")
     return app
 
 

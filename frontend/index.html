@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Крестики-нолики</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+    <script type="module" src="/assets/app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="signature" aria-hidden="true"><span>×</span><span>○</span></div>
+        <h1>Крестики-нолики</h1>
+      </header>
+      <div class="layout">
+        <section class="arena" aria-label="Игровое поле">
+          <div class="arena-header">
+            <h2 id="status" role="status" aria-atomic="true" tabindex="-1">Начните новую игру</h2>
+            <p id="assignment" hidden></p>
+          </div>
+          <div id="board" class="board" role="group" aria-label="Клетки поля"></div>
+          <p id="game-settings" class="game-settings" hidden></p>
+        </section>
+        <aside class="controls" aria-labelledby="settings-title">
+          <h2 id="settings-title">Настройки партии</h2>
+          <form id="settings">
+            <fieldset>
+              <legend>Размер поля</legend>
+              <div class="sizes">
+                <label><input type="radio" name="size" value="3" checked><span>3×3</span></label>
+                <label><input type="radio" name="size" value="4"><span>4×4</span></label>
+                <label><input type="radio" name="size" value="5"><span>5×5</span></label>
+              </div>
+            </fieldset>
+            <label class="mode-label" for="bot-mode">Режим бота</label>
+            <div class="select-wrap">
+              <select id="bot-mode" name="bot_mode">
+                <option value="random">Случайный</option>
+                <option value="smart">Продуманный</option>
+              </select>
+            </div>
+            <p id="settings-note" class="hint" hidden>Настройки применятся к следующей партии.</p>
+            <button id="start" class="primary" type="submit">Новая игра</button>
+          </form>
+          <p id="feedback" class="feedback" role="status" aria-atomic="true"></p>
+          <button id="retry" class="secondary" type="button" hidden>Загрузить поле снова</button>
+          <noscript>Включите JavaScript, чтобы играть.</noscript>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
