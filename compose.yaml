@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      BACKEND_HOST: "0.0.0.0"
+      BACKEND_PORT: "8000"
+      BACKEND_SERVE_FRONTEND: "false"
+      BACKEND_APP_TITLE: "${BACKEND_APP_TITLE:-Tic-Tac-Toe}"
+      BACKEND_MAX_GAMES: "${BACKEND_MAX_GAMES:-10000}"
+      BACKEND_BOT_SEARCH_BUDGET_MS: "${BACKEND_BOT_SEARCH_BUDGET_MS:-200}"
+      BACKEND_LOG_LEVEL: "${BACKEND_LOG_LEVEL:-INFO}"
+      BACKEND_LOG_FORMAT: "${BACKEND_LOG_FORMAT:-%(asctime)s %(levelname)s %(name)s %(message)s}"
+    healthcheck:
+      test: ["CMD", "/app/.venv/bin/python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/openapi.json', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy

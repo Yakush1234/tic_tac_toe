@@ -12,3 +12,6 @@ venv/
 *.iml
 *.ipr
 *.iws
+
+# Ruff stuff:
+.ruff_cache/

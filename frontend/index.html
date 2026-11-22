@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Крестики-нолики</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+    <script type="module" src="/assets/app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <div class="signature" aria-hidden="true"><span data-mark="X"></span><span data-mark="O"></span></div>
+          <h1 data-i18n="title">Крестики-нолики</h1>
+        </div>
+        <fieldset id="language-picker" class="language-picker">
+          <legend class="visually-hidden" data-i18n="language">Язык</legend>
+          <div class="choices choices--languages">
+            <label><input type="radio" name="language" value="ru" checked><span lang="ru">RU</span></label>
+            <label><input type="radio" name="language" value="en"><span lang="en">EN</span></label>
+          </div>
+        </fieldset>
+      </header>
+      <div class="layout">
+        <section class="arena" aria-label="Игровое поле" data-i18n-label="arena">
+          <div class="arena-header">
+            <h2 id="status" role="status" aria-atomic="true" tabindex="-1">Начните новую игру</h2>
+            <p id="assignment" hidden></p>
+          </div>
+          <div id="board" class="board" role="group" aria-label="Клетки поля" data-i18n-label="board"></div>
+          <p id="game-settings" class="game-settings" hidden></p>
+        </section>
+        <aside class="controls" aria-labelledby="settings-title">
+          <h2 id="settings-title" data-i18n="settings">Настройки партии</h2>
+          <form id="settings">
+            <fieldset>
+              <legend data-i18n="size">Размер поля</legend>
+              <div class="choices choices--sizes">
+                <label><input type="radio" name="size" value="3" checked><span>3×3</span></label>
+                <label><input type="radio" name="size" value="4"><span>4×4</span></label>
+                <label><input type="radio" name="size" value="5"><span>5×5</span></label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend data-i18n="mode">Режим бота</legend>
+              <div class="choices choices--modes">
+                <label><input type="radio" name="bot_mode" value="random" checked><span data-i18n="random">Случайный</span></label>
+                <label><input type="radio" name="bot_mode" value="smart"><span data-i18n="smart">Продуманный</span></label>
+              </div>
+            </fieldset>
+            <p id="settings-note" class="hint" data-i18n="settingsNote" hidden>Настройки применятся к следующей партии.</p>
+            <button id="start" class="primary" type="submit" data-i18n="newGame">Новая игра</button>
+          </form>
+          <p id="feedback" class="feedback" role="status" aria-atomic="true"></p>
+          <button id="retry" class="secondary" type="button" data-i18n="retry" hidden>Загрузить поле снова</button>
+          <noscript>Включите JavaScript, чтобы играть.</noscript>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
