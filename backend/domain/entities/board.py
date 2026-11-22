@@ -7,6 +7,19 @@ from backend.domain.exceptions import InvalidMoveError
 from backend.domain.values import BoardSnapshot, Position
 
 
+def has_winning_line(cells: BoardSnapshot, mark: Mark) -> bool:
+    """Check the full rows, columns and corner-to-corner diagonals for a mark."""
+    if mark is Mark.E:
+        return False
+    indices: range = range(len(cells))
+    return (
+        any(all(cell is mark for cell in row) for row in cells)
+        or any(all(row[col] is mark for row in cells) for col in indices)
+        or all(cells[i][i] is mark for i in indices)
+        or all(cells[i][-1 - i] is mark for i in indices)
+    )
+
+
 class Board:
     """Square grid that holds marks and detects completed lines."""
 
@@ -37,16 +50,7 @@ class Board:
 
     def has_winning_line(self: Self, mark: Mark) -> bool:
         """Check whether the mark fills a row, column, or corner-to-corner diagonal."""
-        if mark is Mark.E:
-            return False
-        cells: list[list[Mark]] = self._cells
-        indices: range = range(len(cells))
-        return (
-            any(all(cell is mark for cell in row) for row in cells)
-            or any(all(row[col] is mark for row in cells) for col in indices)
-            or all(cells[i][i] is mark for i in indices)
-            or all(cells[i][-1 - i] is mark for i in indices)
-        )
+        return has_winning_line(self.snapshot(), mark)
 
     def is_full(self: Self) -> bool:
         """Return whether every cell is occupied by a player."""
