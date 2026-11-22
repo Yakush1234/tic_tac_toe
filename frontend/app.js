@@ -1,6 +1,8 @@
 import { ApiError, createGame, getGame, sendMove } from "/assets/api.js";
+import { messages } from "/assets/messages.js";
 
 const form = document.querySelector("#settings");
+const languagePicker = document.querySelector("#language-picker");
 const board = document.querySelector("#board");
 const status = document.querySelector("#status");
 const assignment = document.querySelector("#assignment");
@@ -12,8 +14,7 @@ const retry = document.querySelector("#retry");
 
 const preferencesKey = "tic-tac-toe.preferences";
 const gameKey = "tic-tac-toe.game-id";
-const marks = { X: "×", O: "○", E: "" };
-const modeNames = { random: "Случайный бот", smart: "Продуманный бот" };
+const languageKey = "tic-tac-toe.language";
 
 function readStorage(scope, key) {
   try {
@@ -44,6 +45,7 @@ function loadPreferences() {
   }
 }
 
+let language = readStorage("localStorage", languageKey) === "en" ? "en" : "ru";
 let preferences = loadPreferences();
 let gameId = readStorage("sessionStorage", gameKey);
 let game = null;
@@ -53,6 +55,7 @@ let message = "";
 
 form.elements.namedItem("size").value = String(preferences.size);
 form.elements.namedItem("bot_mode").value = preferences.bot_mode;
+languagePicker.querySelector(`input[value="${language}"]`).checked = true;
 
 function setGame(snapshot) {
   game = snapshot;
@@ -61,14 +64,26 @@ function setGame(snapshot) {
   writeStorage("sessionStorage", gameKey, gameId);
 }
 
-function statusText() {
+function renderLanguage() {
+  const text = messages[language];
+  document.documentElement.lang = language;
+  document.title = text.title;
+  for (const element of document.querySelectorAll("[data-i18n]")) {
+    element.textContent = text[element.dataset.i18n];
+  }
+  for (const element of document.querySelectorAll("[data-i18n-label]")) {
+    element.setAttribute("aria-label", text[element.dataset.i18nLabel]);
+  }
+}
+
+function statusKey() {
   if (pending) return pending;
-  if (needsRefresh) return "Нужно обновить поле";
-  if (!game) return "Начните новую игру";
-  if (game.is_draw) return "Ничья";
-  if (game.winner === "human") return "Вы победили";
-  if (game.winner === "bot") return "Бот победил";
-  return game.current_player === "human" ? "Ваш ход" : "Ход бота";
+  if (needsRefresh) return "refreshNeeded";
+  if (!game) return "startPrompt";
+  if (game.is_draw) return "draw";
+  if (game.winner === "human") return "humanWon";
+  if (game.winner === "bot") return "botWon";
+  return game.current_player === "human" ? "humanTurn" : "botTurn";
 }
 
 function canPlay() {
@@ -76,17 +91,19 @@ function canPlay() {
 }
 
 function render() {
-  const nextStatus = statusText();
+  const text = messages[language];
+  const nextStatus = text[statusKey()];
   if (status.textContent !== nextStatus) status.textContent = nextStatus;
-  if (feedback.textContent !== message) feedback.textContent = message;
+  const translatedMessage = message ? text[message] : "";
+  if (feedback.textContent !== translatedMessage) feedback.textContent = translatedMessage;
   start.disabled = Boolean(pending);
   retry.hidden = !needsRefresh;
   retry.disabled = Boolean(pending);
   assignment.hidden = !game;
-  assignment.textContent = game ? `Вы играете за ${game.human_mark}` : "";
+  assignment.textContent = game ? text.assignment(game.human_mark) : "";
   gameSettings.hidden = !game;
   gameSettings.textContent = game
-    ? `${game.settings.size}×${game.settings.size} · ${modeNames[game.settings.bot_mode]}`
+    ? `${game.settings.size}×${game.settings.size} · ${text[game.settings.bot_mode === "smart" ? "smartBot" : "randomBot"]}`
     : "";
   settingsNote.hidden = !game;
   board.setAttribute("aria-busy", String(Boolean(pending)));
@@ -112,8 +129,7 @@ function render() {
     const column = index % size;
     const mark = game?.board[row][column] ?? "E";
     cell.dataset.mark = mark;
-    cell.textContent = marks[mark];
-    cell.setAttribute("aria-label", `Строка ${row + 1}, столбец ${column + 1}, ${mark === "E" ? "пусто" : mark}`);
+    cell.setAttribute("aria-label", text.cell(row + 1, column + 1, mark === "E" ? text.empty : mark));
     cell.disabled = !game;
     cell.setAttribute("aria-disabled", String(!playable || mark !== "E"));
     cell.tabIndex = playable && mark === "E" ? 0 : -1;
@@ -130,10 +146,10 @@ async function restoreGame(successMessage = "") {
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       setGame(null);
-      message = "Партия больше недоступна. Можно начать новую.";
+      message = "missing";
     } else {
       needsRefresh = true;
-      message = "Не удалось загрузить поле. Попробуйте ещё раз.";
+      message = "loadFailed";
     }
   }
 }
@@ -151,6 +167,13 @@ async function run(label, operation) {
   }
 }
 
+languagePicker.addEventListener("change", (event) => {
+  language = event.target.value;
+  writeStorage("localStorage", languageKey, language);
+  renderLanguage();
+  render();
+});
+
 form.addEventListener("change", () => {
   const data = new FormData(form);
   preferences = { size: Number(data.get("size")), bot_mode: data.get("bot_mode") };
@@ -160,13 +183,13 @@ form.addEventListener("change", () => {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  void run("Создаём партию…", async () => {
+  void run("creating", async () => {
     try {
       setGame(await createGame(preferences, gameId));
     } catch (error) {
       message = error instanceof ApiError && error.status === 503
-        ? "Сервер занят. Попробуйте начать игру позже."
-        : "Не удалось начать новую игру. Попробуйте ещё раз.";
+        ? "busy"
+        : "createFailed";
     }
   });
 });
@@ -176,16 +199,17 @@ board.addEventListener("click", (event) => {
   if (!cell || !canPlay() || cell.dataset.mark !== "E") return;
   const size = game.board.length;
   const index = Number(cell.dataset.index);
-  void run("Обрабатываем ход…", async () => {
+  void run("moving", async () => {
     try {
       setGame(await sendMove(gameId, Math.floor(index / size), index % size));
     } catch {
-      await restoreGame("Поле обновлено. Проверьте позицию перед следующим ходом.");
+      await restoreGame("refreshed");
     }
   });
 });
 
-retry.addEventListener("click", () => void run("Загружаем поле…", restoreGame));
+retry.addEventListener("click", () => void run("loading", restoreGame));
 
+renderLanguage();
 render();
-if (gameId) void run("Восстанавливаем партию…", restoreGame);
+if (gameId) void run("restoring", restoreGame);
